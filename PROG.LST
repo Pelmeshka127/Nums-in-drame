@@ -1,0 +1,860 @@
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 1
+prog.asm
+
+
+
+      1	0000			     .model tiny
+      2	0000			     .code
+      3				     org 100h
+      4
+      5				     ;=======================================================;
+      6	0100			     start:
+      7				     ;=======================================================;
+      8				     ;Input ogf	the numbers
+      9				     ;=======================================================;
+     10	0100  B4 09			     mov ah, 09h
+     11	0102  BA 048Fr			     mov dx, offset Enter_first
+     12	0105  CD 21			     int 21h
+     13
+     14	0107  B4 0A			     mov ah, 0ah
+     15	0109  BA 04C0r			     mov dx, offset first_num
+     16	010C  CD 21			     int 21h
+     17
+     18	010E  B4 09			     mov ah, 09h
+     19	0110  BA 048Cr			     mov dx, offset crlf
+     20	0113  CD 21			     int 21h
+     21
+     22	0115  B4 09			     mov ah, 09h
+     23	0117  BA 04A7r			     mov dx, offset Enter_Second
+     24	011A  CD 21			     int 21h
+     25
+     26	011C  B4 0A			     mov ah, 0ah
+     27	011E  BA 04C6r			     mov dx, offset second_num
+     28	0121  CD 21			     int 21h
+     29
+     30	0123  B4 09			     mov ah, 09h
+     31	0125  BA 048Cr			     mov dx, offset crlf
+     32	0128  CD 21			     int 21h
+     33				     ;=======================================================;
+     34
+     35	012A  E8 0149			     call Draw_Rama
+     36	012D  8B DA			     mov bx, dx	;bx is the adrees start	writing
+     37	012F  53			     push bx ;size = 1
+     38
+     39				     ;=======================================================;
+     40				     ;from ASCII to dec
+     41				     ;=======================================================;
+     42	0130  33 FF			 xor di, di
+     43	0132  33 DB			 xor bx, bx
+     44	0134  33 C9			 xor cx, cx
+     45	0136  8A 0E 04C7r		 mov cl, cur_len_2
+     46	013A  33 C0			 xor ax, ax
+     47	013C  8B F1			 mov si, cx
+     48	013E  B1 0A			 mov cl, 10
+     49
+     50	0140			     to_dec_second:
+     51	0140  8A 9D 04C8r		 mov bl, byte ptr num_2[di]
+     52	0144  80 EB 30			     sub bl, '0'
+     53	0147  F7 E1			     mul cx
+     54	0149  03 C3			     add ax, bx
+     55	014B  47			     inc di
+     56	014C  3B FE			     cmp di, si
+     57	014E  72 F0			     jb	to_dec_second
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 2
+prog.asm
+
+
+
+     58
+     59	0150  50			 push ax ;saving 2_num;	size = 2
+     60
+     61	0151  33 FF			 xor di, di
+     62	0153  33 DB			 xor bx, bx
+     63	0155  33 C9			 xor cx, cx
+     64	0157  8A 0E 04C1r		 mov cl, cur_len_1
+     65	015B  33 C0			 xor ax, ax
+     66	015D  8B F1			 mov si, cx
+     67	015F  B1 0A			 mov cl, 10
+     68
+     69	0161			     to_dec_first:
+     70	0161  8A 9D 04C2r		 mov bl, byte ptr num_1[di]
+     71	0165  80 EB 30			     sub bl, '0'
+     72	0168  F7 E1			     mul cx
+     73	016A  03 C3			     add ax, bx
+     74	016C  47			     inc di
+     75	016D  3B FE			     cmp di, si
+     76	016F  72 F0			     jb	to_dec_first
+     77
+     78	0171  59			 pop cx	;size =	1 (cx =	num_2)
+     79
+     80				     ;=======================================================;
+     81				     ;Sum ax + bx
+     82	0172  50			     push ax ;saving first num;	size = 2
+     83
+     84	0173  E8 0308			     call Summary
+     85
+     86	0176  5A			     pop dx ;dx	= num_1; size =	1
+     87
+     88	0177  5B			     pop bx ;size = 0(adress of	video mem)
+     89
+     90	0178  52			     push dx ;saving num_1(size	= 1)//
+     91	0179  51			     push cx ;saving num_2(size	= 2)//
+     92	017A  53			     push bx ;saving adress of the video_mem (size = 3)
+     93
+     94	017B  50			     push ax ;size = 4(saving value)
+     95
+     96	017C  E8 0062			     call Print_Dec
+     97
+     98	017F  58			     pop ax ;size = 3
+     99	0180  50			     push ax ;size = 4
+    100
+    101	0181  E8 0089			     call Dec_To_Bin
+    102
+    103	0184  58			     pop ax ;size = 3
+    104
+    105	0185  E8 00B1			     call Dec_To_Hex
+    106
+    107				     ;=======================================================;
+    108				     ;Some workes...
+    109	0188  5B			     pop bx ;returning the adress of the video_mem(size	= 2)
+    110	0189  59			     pop cx ;cx	= num_2	(size =	1)
+    111	018A  58			     pop ax ;ax	= num_1	(size =	0)
+    112
+    113	018B  81 C3 01E0		     add bx, 80	* 6
+    114				     ;=======================================================;
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 3
+prog.asm
+
+
+
+    115				     ;Sub ax - bx
+    116
+    117	018F  50			     push ax ;saving first num;	size = 1
+    118
+    119	0190  E8 02EE			     call Subbery
+    120
+    121	0193  5A			     pop dx ;dx	= num_1; size =	0
+    122
+    123	0194  52			     push dx ;saving num_1(size	= 1)//
+    124	0195  51			     push cx ;saving num_2(size	= 2)//
+    125	0196  53			     push bx ;saving adress of the video_mem (size = 3)
+    126
+    127	0197  50			     push ax ;size = 4(saving value)
+    128
+    129	0198  E8 0046			     call Print_Dec
+    130
+    131	019B  58			     pop ax ;size = 3
+    132	019C  50			     push ax ;size = 4
+    133
+    134	019D  E8 006D			     call Dec_To_Bin
+    135
+    136	01A0  58			     pop ax ;size = 3
+    137
+    138	01A1  E8 0095			     call Dec_To_Hex
+    139				     ;=======================================================;
+    140				     ;Some workes...
+    141	01A4  5B			     pop bx ;returning the adress of the video_mem(size	= 2)
+    142	01A5  59			     pop cx ;cx	= num_2	(size =	1)
+    143	01A6  58			     pop ax ;ax	= num_1	(size =	0)
+    144
+    145	01A7  81 C3 01E0		     add bx, 80	* 6
+    146				     ;=======================================================;
+    147				     ;Mul ax * bx
+    148
+    149	01AB  50			     push ax ;saving first num;	size = 1
+    150
+    151	01AC  E8 02D5			     call Multyfruct
+    152
+    153	01AF  5A			     pop dx ;dx	= num_1; size =	0
+    154
+    155	01B0  52			     push dx ;saving num_1(size	= 1)//
+    156	01B1  51			     push cx ;saving num_2(size	= 2)//
+    157	01B2  53			     push bx ;saving adress of the video_mem (size = 3)
+    158
+    159	01B3  50			     push ax ;size = 4(saving value)
+    160
+    161	01B4  E8 002A			     call Print_Dec
+    162
+    163	01B7  58			     pop ax ;size = 3
+    164	01B8  50			     push ax ;size = 4
+    165
+    166	01B9  E8 0051			     call Dec_To_Bin
+    167
+    168	01BC  58			     pop ax ;size = 3
+    169
+    170	01BD  E8 0079			     call Dec_To_Hex
+    171
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 4
+prog.asm
+
+
+
+    172				     ;=======================================================;
+    173				     ;Some workes...
+    174	01C0  5B			     pop bx ;returning the adress of the video_mem(size	= 2)
+    175	01C1  59			     pop cx ;cx	= num_2	(size =	1)
+    176	01C2  58			     pop ax ;ax	= num_1	(size =	0)
+    177
+    178	01C3  81 C3 01E0		     add bx, 80	* 6
+    179				     ;=======================================================;
+    180				     ;Div ax / bx
+    181
+    182	01C7  50			     push ax ;saving first num;	size = 1
+    183
+    184	01C8  E8 02BC			     call Divka
+    185
+    186	01CB  5A			     pop dx ;dx	= num_1; size =	0
+    187
+    188	01CC  52			     push dx ;saving num_1(size	= 1)//
+    189	01CD  51			     push cx ;saving num_2(size	= 2)//
+    190	01CE  53			     push bx ;saving adress of the video_mem (size = 3)
+    191
+    192	01CF  50			     push ax ;size = 4(saving value)
+    193
+    194	01D0  E8 000E			     call Print_Dec
+    195
+    196	01D3  58			     pop ax ;size = 3
+    197	01D4  50			     push ax ;size = 4
+    198
+    199	01D5  E8 0035			     call Dec_To_Bin
+    200
+    201	01D8  58			     pop ax ;size = 3
+    202
+    203	01D9  E8 005D			     call Dec_To_Hex
+    204
+    205				     ;=======================================================;
+    206	01DC  B8 4C00			     mov ax, 4c00h
+    207	01DF  CD 21			     int 21h
+    208				     ;=======================================================;
+    209
+    210				     include lib1.asm
+1   211	01E1			     .code
+1   212				     ;=======================================================;
+1   213				     ;-----------------------PRINT_DEC-----------------------;
+1   214				     ;use: bx, es, dx, ax
+1   215				     ;return decimal number in the video mem
+1   216	01E1			     Print_Dec		     proc
+1   217	01E1  53		     push bx
+1   218
+1   219	01E2  BB B800		     mov bx, 0b800h
+1   220	01E5  8E C3		     mov es, bx
+1   221	01E7  5B		     pop bx
+1   222
+1   223	01E8  53		     push bx
+1   224	01E9  83 C3 04		     add bx, 4
+1   225
+1   226	01EC			     print_num_dec:
+1   227	01EC  B2 0A			     mov dl, 10d
+1   228	01EE  F6 F2			     div dl
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 5
+prog.asm
+
+
+
+1   229	01F0  80 C4 30			     add ah, 30h
+1   230	01F3  8A D0			     mov dl, al
+1   231	01F5  8A C4			     mov al, ah
+1   232	01F7  B4 1C			     mov ah, 1ch
+1   233
+1   234	01F9  26: 88 07			     mov byte ptr es:[bx], al
+1   235	01FC  26: 88 67	01		     mov byte ptr es:[bx + 1], ah
+1   236	0200  83 EB 02			     sub bx, 2
+1   237
+1   238	0203  32 E4			     xor ah, ah
+1   239	0205  8A C2			     mov al, dl
+1   240	0207  3C 00			     cmp al, 0
+1   241	0209  75 E1			     jne print_num_dec
+1   242
+1   243	020B  5B		     pop bx
+1   244	020C  C3			     ret
+1   245	020D				     endp
+1   246				     ;-----------------------PRINT_DEC-----------------------;
+1   247				     ;=======================================================;
+1   248
+1   249				     ;=======================================================;
+1   250				     ;----------------------DEC_T0_BIN-----------------------;
+1   251				     ;use: bx, es, dx, ax
+1   252				     ;return: ax in binary to the video_mem
+1   253				     ;=======================================================;
+1   254	020D			     Dec_To_Bin		     proc
+1   255	020D  53		     push bx
+1   256
+1   257	020E  BB B800		     mov bx, 0b800h  ;video_mem
+1   258	0211  8E C3		     mov es, bx
+1   259	0213  5B		     pop bx
+1   260	0214  53		     push bx
+1   261	0215  83 C3 1E		     add bx, 30	;the start of the mem
+1   262
+1   263	0218			     print_num_bin:
+1   264	0218  B2 02			     mov dl, 2d		     ;delitel'
+1   265	021A  F6 F2			     div dl		     ;ax / 2
+1   266	021C  80 C4 30			     add ah, 30h	     ;ah + '0'
+1   267	021F  8A D0			     mov dl, al		     ;keeping al in dl
+1   268	0221  8A C4			     mov al, ah		     ;moving ah	to the al
+1   269	0223  B4 1C			     mov ah, 1ch	     ;pushing the color
+1   270
+1   271	0225  26: 88 07			     mov byte ptr es:[bx], al		     ;print the	number
+1   272	0228  26: 88 67	01		     mov byte ptr es:[bx + 1], ah    ;print the	color
+1   273	022C  83 EB 02			     sub bx, 2						     ;go left
+1   274
+1   275	022F  32 E4			     xor ah, ah		     ;ah = 0
+1   276	0231  8A C2			     mov al, dl		     ;remaking al
+1   277	0233  3C 00			     cmp al, 0		     ;if al == 0->exit
+1   278	0235  75 E1			     jne print_num_bin
+1   279
+1   280	0237  5B		     pop bx
+1   281	0238  C3			     ret
+1   282	0239				     endp
+1   283
+1   284				     ;-----------------------DEC_T0_BIN----------------------;
+1   285				     ;=======================================================;
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 6
+prog.asm
+
+
+
+1   286
+1   287
+1   288
+1   289				     ;=======================================================;
+1   290				     ;------------------------DEC_TO_HEX---------------------;
+1   291				     ;use: bx, es, ax, dx
+1   292				     ;return: ax in hex	to the video_mem
+1   293				     ;=======================================================;
+1   294
+1   295	0239			     Dec_To_Hex		     proc
+1   296
+1   297				     ;From dec to hex
+1   298	0239  53		     push bx
+1   299
+1   300	023A  BB B800		     mov bx, 0b800h  ;video_mem
+1   301	023D  8E C3		     mov es, bx
+1   302	023F  5B		     pop bx
+1   303	0240  53		     push bx
+1   304	0241  83 C3 28		     add bx, 40	;the start of the mem
+1   305
+1   306	0244			     print_num:
+1   307	0244  B2 10			     mov dl, 16d	     ;delitel'
+1   308	0246  F6 F2			     div dl		     ;ax / 16
+1   309	0248  80 FC 09			     cmp ah, 9d
+1   310	024B  77 1D			     ja	letter_symb
+1   311	024D  76 20			     jbe number_symb
+1   312	024F			     next_symb_hex:
+1   313	024F  8A D0			     mov dl, al		     ;keeping al in dl
+1   314	0251  8A C4			     mov al, ah		     ;moving ah	to the al
+1   315	0253  B4 1C			     mov ah, 1ch	     ;pushing the color
+1   316
+1   317	0255  26: 88 07			     mov byte ptr es:[bx], al		     ;print the	number
+1   318	0258  26: 88 67	01		     mov byte ptr es:[bx + 1], ah    ;print the	color
+1   319	025C  83 EB 02			     sub bx, 2						     ;go left
+1   320
+1   321	025F  32 E4			     xor ah, ah		     ;ah = 0
+1   322	0261  8A C2			     mov al, dl		     ;remaking al
+1   323	0263  3C 00			     cmp al, 0		     ;if al == 0->exit
+1   324	0265  75 DD			     jne print_num
+1   325	0267  EB 0B 90			     jmp done
+1   326
+1   327	026A			     letter_symb:
+1   328	026A  80 C4 37			     add ah, 'A' - 10d	     ;become letter
+1   329	026D  EB E0			     jmp     next_symb_hex
+1   330
+1   331	026F			     number_symb:
+1   332	026F  80 C4 30			     add ah, 30h		     ;become number
+1   333	0272  EB DB			     jmp next_symb_hex
+1   334
+1   335	0274			     done:
+1   336	0274  5B			     pop bx
+1   337	0275  C3			     ret
+1   338	0276				     endp
+1   339
+1   340				     ;------------------------DEC_TO_HEX---------------------;
+1   341				     ;=======================================================;
+1   342
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 7
+prog.asm
+
+
+
+    343				     include frame.asm
+1   344	0276			     .code
+1   345
+1   346				     ;=======================================================;
+1   347
+1   348	0276			     Draw_Rama	 proc
+1   349
+1   350				     ;=======================================================;
+1   351
+1   352				     ;Input coordinates
+1   353	0276  B4 09			 mov ah, 09h
+1   354	0278  BA 03F5r			 mov dx, offset	Enter_x
+1   355	027B  CD 21			 int 21h
+1   356
+1   357	027D  B4 0A			 mov ah, 0ah
+1   358	027F  BA 0466r			 mov dx, offset	x_coord
+1   359	0282  CD 21			 int 21h
+1   360
+1   361	0284  B4 09			 mov ah, 09h
+1   362	0286  BA 048Cr			 mov dx, offset	crlf
+1   363	0289  CD 21			 int 21h
+1   364
+1   365	028B  B4 09			 mov ah, 09h
+1   366	028D  BA 040Er			 mov dx, offset	Enter_Y
+1   367	0290  CD 21			 int 21h
+1   368
+1   369	0292  B4 0A			 mov ah, 0ah
+1   370	0294  BA 046Cr			 mov dx, offset	y_coord
+1   371	0297  CD 21			 int 21h
+1   372
+1   373	0299  B4 09			 mov ah, 09h
+1   374	029B  BA 048Cr			 mov dx, offset	crlf
+1   375	029E  CD 21			 int 21h
+1   376
+1   377	02A0  B4 09			 mov ah, 09h
+1   378	02A2  BA 0427r			 mov dx, offset	Enter_Length
+1   379	02A5  CD 21			 int 21h
+1   380
+1   381	02A7  B4 0A			 mov ah, 0ah
+1   382	02A9  BA 0472r			 mov dx, offset	length
+1   383	02AC  CD 21			 int 21h
+1   384
+1   385	02AE  B4 09			 mov ah, 09h
+1   386	02B0  BA 048Cr			 mov dx, offset	crlf
+1   387	02B3  CD 21			 int 21h
+1   388
+1   389	02B5  B4 09			 mov ah, 09h
+1   390	02B7  BA 0447r			 mov dx, offset	Enter_Width
+1   391	02BA  CD 21			 int 21h
+1   392
+1   393	02BC  B4 0A			 mov ah, 0ah
+1   394	02BE  BA 0478r			 mov dx, offset	width
+1   395	02C1  CD 21			 int 21h
+1   396
+1   397	02C3  B4 09			 mov ah, 09h
+1   398	02C5  BA 048Cr			 mov dx, offset	crlf
+1   399	02C8  CD 21			 int 21h
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 8
+prog.asm
+
+
+
+1   400				     ;=======================================================;
+1   401				     ;draw spaces
+1   402	02CA  BB B800			 mov bx, 0b800h
+1   403	02CD  8E C3			 mov es, bx
+1   404	02CF  33 DB			 xor bx, bx
+1   405	02D1  B9 07D0			 mov cx, 80 * 25
+1   406
+1   407	02D4			     draw_space:
+1   408	02D4  26: C6 07	20		 mov byte ptr es:[bx], 20h
+1   409	02D8  26: C6 47	01 0C		 mov byte ptr es:[bx + 1], 0ch
+1   410	02DD  83 C3 02			 add bx, 2
+1   411	02E0  E2 F2			 loop draw_space
+1   412
+1   413				     ;=======================================================;
+1   414
+1   415				     ;Work with	coordinates
+1   416				     ;x	coordinate
+1   417	02E2  33 FF			 xor di, di
+1   418	02E4  33 DB			 xor bx, bx
+1   419	02E6  33 C9			 xor cx, cx
+1   420	02E8  8A 0E 0467r		 mov cl, cur_len_x
+1   421	02EC  33 C0			 xor ax, ax
+1   422	02EE  8B F1			 mov si, cx
+1   423	02F0  B1 0A			 mov cl, 10
+1   424
+1   425	02F2			     to_dec_x:
+1   426	02F2  8A 9D 0468r		 mov bl, byte ptr x[di]
+1   427	02F6  80 EB 30			     sub bl, '0'
+1   428	02F9  F7 E1			     mul cx
+1   429	02FB  03 C3			     add ax, bx
+1   430	02FD  47			     inc di
+1   431	02FE  3B FE			     cmp di, si
+1   432	0300  72 F0			     jb	to_dec_x
+1   433
+1   434				     ;save x
+1   435	0302  50			 push ax ;size = 1
+1   436
+1   437				     ;y	coordinate
+1   438	0303  33 FF			 xor di, di
+1   439	0305  33 DB			 xor bx, bx
+1   440	0307  33 C9			 xor cx, cx
+1   441	0309  8A 0E 046Dr		 mov cl, cur_len_y
+1   442	030D  33 C0			 xor ax, ax
+1   443	030F  8B F1			 mov si, cx
+1   444	0311  B1 0A			 mov cl, 10
+1   445
+1   446	0313			     to_dec_y:
+1   447	0313  8A 9D 046Er		 mov bl, byte ptr y[di]
+1   448	0317  80 EB 30			     sub bl, '0'
+1   449	031A  F7 E1			     mul cx
+1   450	031C  03 C3			     add ax, bx
+1   451	031E  47			     inc di
+1   452	031F  3B FE			     cmp di, si
+1   453	0321  72 F0			     jb	to_dec_y
+1   454
+1   455				     ;x	= cx
+1   456	0323  59			 pop cx	;size =	0
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 9
+prog.asm
+
+
+
+1   457
+1   458				     ;=======================================================;
+1   459				     ;Start of the video_mem
+1   460
+1   461	0324  BB B800			 mov bx, 0b800h
+1   462	0327  8E C3			 mov es, bx
+1   463
+1   464	0329  8B D9			 mov bx, cx
+1   465	032B  B1 50			 mov cl, 80
+1   466	032D  F7 E1			 mul cx
+1   467	032F  03 D8			 add bx, ax
+1   468
+1   469				     ;save bx
+1   470	0331  8B D3			 mov dx, bx
+1   471	0333  81 C2 0142		 add dx, 80 * 4	+ 2
+1   472	0337  52			 push dx ;size = 1(the adress of the writing number)
+1   473	0338  53			 push bx ;size = 2
+1   474				     ;=======================================================;
+1   475				     ;Length
+1   476	0339  33 FF			 xor di, di
+1   477	033B  33 DB			 xor bx, bx
+1   478	033D  33 C9			 xor cx, cx
+1   479	033F  8A 0E 0473r		 mov cl, cur_len_len
+1   480	0343  33 C0			 xor ax, ax
+1   481	0345  8B F1			 mov si, cx
+1   482	0347  B1 0A			 mov cl, 10
+1   483
+1   484	0349			     to_dec_len:
+1   485	0349  8A 9D 0474r		 mov bl, byte ptr len[di]
+1   486	034D  80 EB 30			     sub bl, '0'
+1   487	0350  F7 E1			     mul cx
+1   488	0352  03 C3			     add ax, bx
+1   489	0354  47			     inc di
+1   490	0355  3B FE			     cmp di, si
+1   491	0357  72 F0			     jb	to_dec_len
+1   492
+1   493				     ;cx = length
+1   494	0359  8B C8			 mov cx, ax
+1   495
+1   496				     ;returning	of bx
+1   497	035B  5B			 pop bx	;size =	1
+1   498				     ;save length
+1   499	035C  51			 push cx ;size = 2
+1   500				     ;save starting video_mem
+1   501	035D  53			 push bx ;size = 3
+1   502
+1   503				     ;=======================================================;
+1   504
+1   505				     ;draw up_line
+1   506	035E  26: C6 07	C9		 mov byte ptr es:[bx], 0c9h
+1   507	0362  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   508	0367  83 C3 02			 add bx, 2
+1   509
+1   510	036A			     next_1:
+1   511	036A  26: C6 07	CD		 mov byte ptr es:[bx], 0cdh
+1   512	036E  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   513	0373  83 C3 02			 add bx, 2
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 10
+prog.asm
+
+
+
+1   514	0376  E2 F2			 loop next_1
+1   515
+1   516	0378  26: C6 07	BB		 mov byte ptr es:[bx], 0bbh
+1   517	037C  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   518
+1   519				     ;=======================================================;
+1   520				     ;Width
+1   521	0381  33 FF			 xor di, di
+1   522	0383  33 DB			 xor bx, bx
+1   523	0385  33 C9			 xor cx, cx
+1   524	0387  8A 0E 0479r		 mov cl, cur_len_wid
+1   525	038B  33 C0			 xor ax, ax
+1   526	038D  8B F1			 mov si, cx
+1   527	038F  B1 0A			 mov cl, 10
+1   528
+1   529	0391			     to_dec_wid:
+1   530	0391  8A 9D 047Ar		 mov bl, byte ptr wid[di]
+1   531	0395  80 EB 30			     sub bl, '0'
+1   532	0398  F7 E1			     mul cx
+1   533	039A  03 C3			     add ax, bx
+1   534	039C  47			     inc di
+1   535	039D  3B FE			     cmp di, si
+1   536	039F  72 F0			     jb	to_dec_wid
+1   537				     ;=======================================================;
+1   538
+1   539				     ;returning	starting video_mem
+1   540	03A1  5B			 pop bx	;size =	2
+1   541				     ;returning	the length
+1   542	03A2  59			 pop cx	;size =	1
+1   543				     ;save the length
+1   544	03A3  51			 push cx ;size = 2
+1   545
+1   546				     ;=======================================================;
+1   547				     ;draw vert	lines
+1   548	03A4  8B F8			 mov di, ax ;di	= width
+1   549	03A6  81 C3 00A0		 add bx, 80 * 2
+1   550	03AA  03 C9			 add cx, cx
+1   551	03AC  83 C1 02			 add cx, 2
+1   552	03AF			     draw_vert:
+1   553	03AF  26: C6 07	BA		 mov byte ptr es:[bx], 0bah
+1   554	03B3  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   555	03B8  03 D9			 add bx, cx
+1   556	03BA  26: C6 07	BA		 mov byte ptr es:[bx], 0bah
+1   557	03BE  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   558	03C3  2B D9			 sub bx, cx
+1   559	03C5  81 C3 00A0		 add bx, 80 * 2
+1   560	03C9  4F			 dec di
+1   561	03CA  83 FF 00			 cmp di, 0
+1   562	03CD  77 E0			 ja draw_vert
+1   563
+1   564				     ;=======================================================;
+1   565				     ;draw down_line
+1   566				     ;returning	the length
+1   567	03CF  59			 pop cx	;size =	1
+1   568	03D0  26: C6 07	C8		 mov byte ptr es:[bx], 0c8h
+1   569	03D4  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   570	03D9  83 C3 02			 add bx, 2
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 11
+prog.asm
+
+
+
+1   571
+1   572	03DC			     next_2:
+1   573	03DC  26: C6 07	CD		 mov byte ptr es:[bx], 0cdh
+1   574	03E0  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   575	03E5  83 C3 02			 add bx, 2
+1   576	03E8  E2 F2			 loop next_2
+1   577
+1   578	03EA  26: C6 07	BC		 mov byte ptr es:[bx], 0bch
+1   579	03EE  26: C6 47	01 5B		 mov byte ptr es:[bx + 1],5bh
+1   580
+1   581				     ;=======================================================;
+1   582	03F3  5A			 pop dx	;size =	0
+1   583	03F4  C3			 ret
+1   584	03F5				 endp
+1   585
+1   586				     ;=======================================================;
+1   587
+1   588	03F5  45 6E 74 65 72 20	74+  Enter_X db	"Enter the X coordinate: $"
+    589	      68 65 20 58 20 63	6F+
+    590	      6F 72 64 69 6E 61	74+
+    591	      65 3A 20 24
+1   592
+1   593	040E  45 6E 74 65 72 20	74+  Enter_Y db	"Enter the Y coordinate: $"
+    594	      68 65 20 59 20 63	6F+
+    595	      6F 72 64 69 6E 61	74+
+    596	      65 3A 20 24
+1   597
+1   598	0427  45 6E 74 65 72 20	74+  Enter_Length db "Enter the	length of the drame: $"
+    599	      68 65 20 6C 65 6E	67+
+    600	      74 68 20 6F 66 20	74+
+    601	      68 65 20 64 72 61	6D+
+    602	      65 3A 20 24
+1   603
+1   604	0447  45 6E 74 65 72 20	74+  Enter_Width db "Enter the width of	the drame: $"
+    605	      68 65 20 77 69 64	74+
+    606	      68 20 6F 66 20 74	68+
+    607	      65 20 64 72 61 6D	65+
+    608	      3A 20 24
+1   609
+1   610	0466			     x_coord:
+1   611	0466  04			 max_len_x db 4
+1   612	0467  ??			 cur_len_x db ?
+1   613	0468  04*(24)			 x db 4	dup ('$')
+1   614
+1   615	046C			     y_coord:
+1   616	046C  04			 max_len_y db 4
+1   617	046D  ??			 cur_len_y db ?
+1   618	046E  04*(24)			 y db 4	dup ('$')
+1   619
+1   620	0472			     length:
+*Warning* frame.asm(263) Reserved word used as symbol: LENGTH
+1   621	0472  04			 max_len_len db	4
+1   622	0473  ??			 cur_len_len db	?
+1   623	0474  04*(24)			 len db	4 dup ('$')
+1   624
+1   625	0478			     width:
+*Warning* frame.asm(268) Reserved word used as symbol: WIDTH
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 12
+prog.asm
+
+
+
+1   626	0478  04			 max_len_wid db	4
+1   627	0479  ??			 cur_len_wid db	?
+1   628	047A  04*(24)			 wid db	4 dup ('$')
+1   629
+1   630				     ;=======================================================;
+    631				     include oper.asm
+1   632	047E			     .code
+1   633
+1   634				     ;=======================================================;
+1   635				     ;Sum
+1   636				     ;=======================================================;
+1   637	047E			     Summary	 proc
+1   638	047E  03 C1			 add ax, cx
+1   639
+1   640	0480  C3			 ret
+1   641	0481				 endp
+1   642				     ;=======================================================;
+1   643				     ;Sub
+1   644				     ;=======================================================;
+1   645	0481			     Subbery	proc
+1   646	0481  2B C1			 sub ax, cx
+1   647
+1   648	0483  C3			 ret
+1   649	0484				 endp
+1   650				     ;=======================================================;
+1   651				     ;Mul
+1   652				     ;=======================================================;
+1   653	0484			     Multyfruct	    proc
+1   654	0484  F7 E1			 mul cx
+1   655
+1   656	0486  C3			 ret
+1   657	0487				 endp
+1   658				     ;=======================================================;
+1   659				     ;Div
+1   660				     ;=======================================================;
+1   661	0487			     Divka     proc
+1   662	0487  F7 F1			 div cx
+1   663	0489  B4 00			 mov ah, 0h
+1   664
+1   665	048B  C3			 ret
+1   666	048C				 endp
+1   667				     ;=======================================================;
+    668
+    669				     ;=======================================================;
+    670
+    671	048C  0D 0A 24		     crlf db 0dh, 0ah, '$'
+    672
+    673	048F  45 6E 74 65 72 20	74+  Enter_first db "Enter the first value: $"
+    674	      68 65 20 66 69 72	73+
+    675	      74 20 76 61 6C 75	65+
+    676	      3A 20 24
+    677
+    678	04A7  45 6E 74 65 72 20	74+  Enter_Second db "Enter the	seconf value: $"
+    679	      68 65 20 73 65 63	6F+
+    680	      6E 66 20 76 61 6C	75+
+    681	      65 3A 20 24
+    682
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 13
+prog.asm
+
+
+
+    683	04C0			     first_num:
+    684	04C0  04			 max_len_1 db 4
+    685	04C1  ??			 cur_len_1 db ?
+    686	04C2  04*(24)			 num_1 db 4 dup('$')
+    687
+    688	04C6			     second_num:
+    689	04C6  04			 max_len_2 db 4
+    690	04C7  ??			 cur_len_2 db ?
+    691	04C8  04*(24)			 num_2 db 4 dup('$')
+    692
+    693				     end start
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 14
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "02/20/23"
+??FILENAME			  Text	 "prog	  "
+??TIME				  Text	 "02:22:07"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 DGROUP
+@CODESIZE			  Text	 0
+@CPU				  Text	 0101H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 PROG
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 1
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+CRLF				  Byte	 DGROUP:048C
+CUR_LEN_1			  Byte	 DGROUP:04C1
+CUR_LEN_2			  Byte	 DGROUP:04C7
+CUR_LEN_LEN			  Byte	 DGROUP:0473
+CUR_LEN_WID			  Byte	 DGROUP:0479
+CUR_LEN_X			  Byte	 DGROUP:0467
+CUR_LEN_Y			  Byte	 DGROUP:046D
+DEC_TO_BIN			  Near	 DGROUP:020D
+DEC_TO_HEX			  Near	 DGROUP:0239
+DIVKA				  Near	 DGROUP:0487
+DONE				  Near	 DGROUP:0274
+DRAW_RAMA			  Near	 DGROUP:0276
+DRAW_SPACE			  Near	 DGROUP:02D4
+DRAW_VERT			  Near	 DGROUP:03AF
+ENTER_FIRST			  Byte	 DGROUP:048F
+ENTER_LENGTH			  Byte	 DGROUP:0427
+ENTER_SECOND			  Byte	 DGROUP:04A7
+ENTER_WIDTH			  Byte	 DGROUP:0447
+ENTER_X				  Byte	 DGROUP:03F5
+ENTER_Y				  Byte	 DGROUP:040E
+FIRST_NUM			  Near	 DGROUP:04C0
+LEN				  Byte	 DGROUP:0474
+LENGTH				  Near	 DGROUP:0472
+LETTER_SYMB			  Near	 DGROUP:026A
+MAX_LEN_1			  Byte	 DGROUP:04C0
+MAX_LEN_2			  Byte	 DGROUP:04C6
+MAX_LEN_LEN			  Byte	 DGROUP:0472
+MAX_LEN_WID			  Byte	 DGROUP:0478
+MAX_LEN_X			  Byte	 DGROUP:0466
+MAX_LEN_Y			  Byte	 DGROUP:046C
+MULTYFRUCT			  Near	 DGROUP:0484
+NEXT_1				  Near	 DGROUP:036A
+NEXT_2				  Near	 DGROUP:03DC
+NEXT_SYMB_HEX			  Near	 DGROUP:024F
+NUMBER_SYMB			  Near	 DGROUP:026F
+NUM_1				  Byte	 DGROUP:04C2
+NUM_2				  Byte	 DGROUP:04C8
+PRINT_DEC			  Near	 DGROUP:01E1
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 15
+Symbol Table
+
+
+
+PRINT_NUM			  Near	 DGROUP:0244
+PRINT_NUM_BIN			  Near	 DGROUP:0218
+PRINT_NUM_DEC			  Near	 DGROUP:01EC
+SECOND_NUM			  Near	 DGROUP:04C6
+START				  Near	 DGROUP:0100
+SUBBERY				  Near	 DGROUP:0481
+SUMMARY				  Near	 DGROUP:047E
+TO_DEC_FIRST			  Near	 DGROUP:0161
+TO_DEC_LEN			  Near	 DGROUP:0349
+TO_DEC_SECOND			  Near	 DGROUP:0140
+TO_DEC_WID			  Near	 DGROUP:0391
+TO_DEC_X			  Near	 DGROUP:02F2
+TO_DEC_Y			  Near	 DGROUP:0313
+WID				  Byte	 DGROUP:047A
+WIDTH				  Near	 DGROUP:0478
+X				  Byte	 DGROUP:0468
+X_COORD				  Near	 DGROUP:0466
+Y				  Byte	 DGROUP:046E
+Y_COORD				  Near	 DGROUP:046C
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  _DATA				  16  0000 Word	  Public  DATA
+  _TEXT				  16  04CC Word	  Public  CODE
+Turbo Assembler	 Version 4.1	    02/20/23 02:22:08	    Page 16
+Error Summary
+
+
+
+*Warning* frame.asm(263) Reserved word used as symbol: LENGTH
+*Warning* frame.asm(268) Reserved word used as symbol: WIDTH
+
